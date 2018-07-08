@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login to Restaurant Menu App</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start"></script>
+    <!-- <meta name="google-signin-client_id" content="1083142672222-hscp7b9rjc2j32ued6868ts4st7kbpeh.apps.googleusercontent.com"> -->
+</head>
+<body>
+    <!-- <div class="g-signin2"
+        data-onsuccess="onSignIn">
+    </div> -->
+    <div id="signinButton">
+        <span class="g-signin"
+            data-scope="openid email"
+            data-clientid="1083142672222-hscp7b9rjc2j32ued6868ts4st7kbpeh.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="onSignIn"
+            data-approvalprompt="force">
+        </span>
+    </div>
+    <div class="result"></div>
+    <!-- <button id="idGSignin">Sign In</button> -->
+    <a href="#" onclick="signOut();">Sign Out</a>
+    <script>
+        if ({{RELOAD}}) {
+            setTimeout(function () {
+                location.href = "login?state={{STATE}}";
+            }, 100);
+        }
+        function start () {
+            console.log("Platform started and running...");
+        }
+        function onSignIn(oAuthResult) {
+            if (oAuthResult["code"]) {
+                document.querySelector("#signinButton").style.display = "none";
+                fetch("/gconnect?state={{STATE}}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/octet-stream; charset=utf-8"
+                    },
+                    body: oAuthResult["code"]
+                })
+                .then((result) => {
+                    let resultDiv = document.querySelector(".result");
+                    resultDiv.innerHTML = `<span>Login successful! ${result} Redirecting...</span>`;
+                    setTimeout(() => {
+                        window.location.href = "/restaurant";
+                    }, 4000);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+            } else if (oAuthResult["error"]) {
+                console.error(`There was an error: ${oAuthResult["error"]}`);
+            } else {
+                let resultDiv = document.querySelector(".result");
+                resultDiv.innerHTML = "<span>Failed to make service side call. Check console & configuration</span>";
+            }
+            // var oProfile = oUser.getBasicProfile();
+            // console.log(`ID: ${oProfile.getId()}`);
+            // console.log(`Name: ${oProfile.getName()}`);
+            // console.log(`Image URL: ${oProfile.getImageUrl()}`);
+            // console.log(`Email: ${oProfile.getEmail()}`);
+        }
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log("User logged out");
+            });
+        }
+    </script>
+</body>
+</html>
