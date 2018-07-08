@@ -1,0 +1,5 @@
+.vscode
+.vagrant
+client_secrets.json
+database_setup.pyc
+__pycache__
